@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test API</title>
+  <script type="text/javascript">
+    function httpGetAsync(theUrl, callback) {
+      fetch(theUrl).then(callback)
+    }
+    httpGetAsync("http://127.0.0.1:5000/store/MyStore", response => response.json().then(data => console.log(data)))
+  </script>
+</head>
+<body>
+  
+</body>
+</html>
