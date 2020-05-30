@@ -1,7 +1,7 @@
 # Online Store
 
 | Endpoint | HTTP Method | Result |
-| --- | --- | --- |
+| ---- | ---- | ---- |
 | /store | GET | get all stores |
 | /store/:name | GET | get named store |
 | /store/:name/item | GET | get items from named store |
