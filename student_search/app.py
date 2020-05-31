@@ -17,6 +17,11 @@ students = []
 
 
 class Student(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        "name", type=str, required=True, help="this field cannot be left blank"
+    )
+
     @jwt_required()
     def get(self, id):
         student = next((student for student in students if student["id"] == id), None)
@@ -31,8 +36,8 @@ class Student(Resource):
             is not None
         ):
             return {"message": "A student with id {} already exists".format(id)}, 400
-        request_data = request.get_json()
-        student = {"id": id, "name": request_data["name"]}
+        data = Student.parser.parse_args()
+        student = {"id": id, "name": data["name"]}
         students.append(student)
         return student, 201
 
@@ -44,11 +49,7 @@ class Student(Resource):
 
     @jwt_required()
     def put(self, id):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "name", type=str, required=True, help="this field cannot be left blank"
-        )
-        data = parser.parse_args()
+        data = Student.parser.parse_args()
         student = next((student for student in students if student["id"] == id), None)
         if student is None:
             student = {"id": id, "name": data["name"]}
