@@ -36,8 +36,16 @@ class Student(Resource):
 
         data = Student.parser.parse_args()
         student = {"id": id, "name": data["name"]}
-        print(student)
 
+        try:
+            self.insert(student)
+        except:
+            return {"message", "An error occured creating the student."}, 500
+
+        return student, 201
+
+    @classmethod
+    def insert(cls, student):
         connection = sqlite3.connect("data.sqlite")
         cursor = connection.cursor()
         query = "INSERT INTO students VALUES (?, ?)"
@@ -45,29 +53,54 @@ class Student(Resource):
         connection.commit()
         connection.close()
 
-        return student, 201
-
     @jwt_required()
     def delete(self, id):
-        global students
-        students = [student for student in students if student["id"] != id]
+        connection = sqlite3.connect("data.sqlite")
+        cursor = connection.cursor()
+        query = "DELETE FROM students WHERE id=?"
+        cursor.execute(query, (id,))
+        connection.commit()
+        connection.close()
         return {"message": "Student deleted"}
 
     @jwt_required()
     def put(self, id):
         data = Student.parser.parse_args()
-        student = next((student for student in students if student["id"] == id), None)
+        student = self.find_by_id(id)
+        updated_student = {"id": id, "name": data["name"]}
         if student is None:
-            student = {"id": id, "name": data["name"]}
-            students.append(student)
+            try:
+                self.insert(updated_student)
+            except:
+                return {"message": "An error occurred creating the student."}, 500
         else:
-            student.update(data)
+            try:
+                self.update(updated_student)
+            except:
+                return {"message": "An error occured updating the student."}, 500
         return student
+
+    @classmethod
+    def update(cls, student):
+        connection = sqlite3.connect("data.sqlite")
+        cursor = connection.cursor()
+        query = "UPDATE students SET name=? WHERE id=?"
+        cursor.execute(query, (student["name"], student["id"]))
+        connection.commit()
+        connection.close()
 
 
 class Students(Resource):
     @jwt_required()
     def get(self):
+        connection = sqlite3.connect("data.sqlite")
+        cursor = connection.cursor()
+        query = "SELECT * FROM students"
+        result = cursor.execute(query)
+        students = []
+        for row in result:
+            students.append({"id": row[0], "name": row[1]})
+        connection.close()
         if students:
-            return {"students": students}
-        return {"students": None}, 404
+            return students, 200
+        return {"students": students}, 404
