@@ -7,4 +7,5 @@ Endpoint | Method | Result |
 /student/{id} | POST | Create student with ID and set name |
 /student/{id} | PUT | Update student with ID and change name |
 /student/{id} | DELETE | Delete student with ID |
-/auth | GET | Get authentication key with valid username & password |
+/auth | POST | Get authentication key with valid username & password |
+/register | POST | Create new user with username & password |
