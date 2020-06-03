@@ -2,6 +2,8 @@ import sqlite3
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 
+from models.student import StudentModel
+
 
 class Student(Resource):
     parser = reqparse.RequestParser()
@@ -11,47 +13,25 @@ class Student(Resource):
 
     @jwt_required()
     def get(self, id):
-        student = self.find_by_id(id)
+        student = StudentModel.find_by_id(id)
         if student:
-            return student
+            return student.json()
         return {"message": "student not found"}, 404
-
-    @classmethod
-    def find_by_id(cls, id):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM students WHERE id=?"
-        result = cursor.execute(query, (id,))
-        row = result.fetchone()
-        connection.close()
-
-        if row:
-            return {"student": {"id": row[0], "name": row[1]}}
 
     @jwt_required()
     def post(self, id):
-        if self.find_by_id(id):
+        if StudentModel.find_by_id(id):
             return {"message": "A student with id {} already exists".format(id)}, 400
 
         data = Student.parser.parse_args()
-        student = {"id": id, "name": data["name"]}
+        student = StudentModel(id, data["name"])
 
         try:
-            self.insert(student)
+            student.insert()
         except:
             return {"message", "An error occured creating the student."}, 500
 
-        return student, 201
-
-    @classmethod
-    def insert(cls, student):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "INSERT INTO students VALUES (?, ?)"
-        cursor.execute(query, (student["id"], student["name"]))
-        connection.commit()
-        connection.close()
+        return student.json(), 201
 
     @jwt_required()
     def delete(self, id):
@@ -66,28 +46,19 @@ class Student(Resource):
     @jwt_required()
     def put(self, id):
         data = Student.parser.parse_args()
-        student = self.find_by_id(id)
-        updated_student = {"id": id, "name": data["name"]}
+        student = StudentModel.find_by_id(id)
+        updated_student = StudentModel(id, data["name"])
         if student is None:
             try:
-                self.insert(updated_student)
+                updated_student.insert()
             except:
                 return {"message": "An error occurred creating the student."}, 500
         else:
             try:
-                self.update(updated_student)
+                updated_student.update()
             except:
                 return {"message": "An error occured updating the student."}, 500
-        return student
-
-    @classmethod
-    def update(cls, student):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "UPDATE students SET name=? WHERE id=?"
-        cursor.execute(query, (student["name"], student["id"]))
-        connection.commit()
-        connection.close()
+        return student.json(), 201
 
 
 class Students(Resource):
