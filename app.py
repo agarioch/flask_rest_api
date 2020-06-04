@@ -4,6 +4,7 @@ from flask_restful import Api
 
 from resources.student import Student, Students
 from resources.user import UserRegister
+from resources.degree import Degree, Degrees
 from security import authenticate, identity
 
 app = Flask(__name__)
@@ -24,7 +25,9 @@ def create_tables():
 jst = JWT(app, authenticate, identity)
 
 api.add_resource(Student, "/student/<string:id>")
+api.add_resource(Degree, "/degree/<string:name>")
 api.add_resource(Students, "/students")
+api.add_resource(Degrees, "/degrees")
 api.add_resource(UserRegister, "/register")
 
 if __name__ == "__main__":
