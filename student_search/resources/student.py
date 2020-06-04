@@ -27,7 +27,7 @@ class Student(Resource):
         student = StudentModel(id, data["name"])
 
         try:
-            student.insert()
+            student.save_to_db()
         except:
             return {"message", "An error occured creating the student."}, 500
 
@@ -35,29 +35,23 @@ class Student(Resource):
 
     @jwt_required()
     def delete(self, id):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "DELETE FROM students WHERE id=?"
-        cursor.execute(query, (id,))
-        connection.commit()
-        connection.close()
+        student = StudentModel.find_by_id(id)
+        if student:
+            student.delete_from_db()
         return {"message": "Student deleted"}
 
     @jwt_required()
     def put(self, id):
         data = Student.parser.parse_args()
         student = StudentModel.find_by_id(id)
-        updated_student = StudentModel(id, data["name"])
+
         if student is None:
-            try:
-                updated_student.insert()
-            except:
-                return {"message": "An error occurred creating the student."}, 500
+            student = StudentModel(id, data["name"])
         else:
-            try:
-                updated_student.update()
-            except:
-                return {"message": "An error occured updating the student."}, 500
+            student.name = data["name"]
+
+        student.save_to_db()
+
         return student.json(), 201
 
 

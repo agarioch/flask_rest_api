@@ -1,7 +1,11 @@
-import sqlite3
+from db import db
 
 
-class StudentModel:
+class StudentModel(db.Model):
+    __tablename__ = "students"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+
     def __init__(self, id, name):
         self.id = id
         self.name = name
@@ -11,29 +15,12 @@ class StudentModel:
 
     @classmethod
     def find_by_id(cls, id):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
+        return cls.query.filter_by(id=id).first()
 
-        query = "SELECT * FROM students WHERE id=?"
-        result = cursor.execute(query, (id,))
-        row = result.fetchone()
-        connection.close()
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
 
-        if row:
-            return cls(*row)
-
-    def insert(self):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "INSERT INTO students VALUES (?, ?)"
-        cursor.execute(query, (self.id, self.name))
-        connection.commit()
-        connection.close()
-
-    def update(self):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "UPDATE students SET name=? WHERE id=?"
-        cursor.execute(query, (self.name, self.id))
-        connection.commit()
-        connection.close()
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
