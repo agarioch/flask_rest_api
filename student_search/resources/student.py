@@ -58,14 +58,4 @@ class Student(Resource):
 class Students(Resource):
     @jwt_required()
     def get(self):
-        connection = sqlite3.connect("data.sqlite")
-        cursor = connection.cursor()
-        query = "SELECT * FROM students"
-        result = cursor.execute(query)
-        students = []
-        for row in result:
-            students.append({"id": row[0], "name": row[1]})
-        connection.close()
-        if students:
-            return students, 200
-        return {"students": students}, 404
+        return {"Students": [student.json() for student in StudentModel.query.all()]}

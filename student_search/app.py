@@ -12,6 +12,12 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = "testing"
 api = Api(app)
 
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+
 # create /auth endpoint
 # call authenticate to return jwt token if password matches
 # use jwt token to get user
