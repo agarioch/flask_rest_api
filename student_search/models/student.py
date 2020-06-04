@@ -1,3 +1,5 @@
+import json
+
 from db import db
 
 
@@ -6,10 +8,15 @@ class StudentModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
 
-    def __init__(self, id, name):
+    degree_id = db.Column(db.Integer, db.ForeignKey("degrees.id"))
+    degree = db.relationship("DegreeModel")
+
+    def __init__(self, id, name, degree_id):
         self.id = id
         self.name = name
+        self.degree_id = degree_id
 
+    # fmt: off
     def json(self):
         return {"id": self.id, "name": self.name}
 

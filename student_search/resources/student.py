@@ -10,6 +10,9 @@ class Student(Resource):
     parser.add_argument(
         "name", type=str, required=True, help="this field cannot be left blank"
     )
+    parser.add_argument(
+        "degree_id", type=int, required=True, help="please provide degree id"
+    )
 
     @jwt_required()
     def get(self, id):
@@ -24,7 +27,7 @@ class Student(Resource):
             return {"message": "A student with id {} already exists".format(id)}, 400
 
         data = Student.parser.parse_args()
-        student = StudentModel(id, data["name"])
+        student = StudentModel(id, **data)
 
         try:
             student.save_to_db()
@@ -46,9 +49,10 @@ class Student(Resource):
         student = StudentModel.find_by_id(id)
 
         if student is None:
-            student = StudentModel(id, data["name"])
+            student = StudentModel(id, **data)
         else:
             student.name = data["name"]
+            student.degree_id = data["degree_id"]
 
         student.save_to_db()
 
