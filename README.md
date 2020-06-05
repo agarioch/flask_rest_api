@@ -8,9 +8,9 @@ Learning flask to build REST APIs
 
 ## Installation
 
-'''python
+```python
 pip install -r requirements.txt
 python app.py
-'''
+```
 
 See project readme files for REST endpoints
